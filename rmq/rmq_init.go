@@ -13,24 +13,44 @@ func InitRabbit() {
 	if err != nil {
 		panic(err.Error())
 	}
-	q, err := ch.QueueDeclare(
-		"test",
-		false,
-		false,
-		false,
-		false,
-		nil)
 
-	body := "hello world"
+	err = ch.ExchangeDeclare(
+		"e.balances.forward",
+		"topic",
+		true,
+		false,
+		true,
+		false,
+		amqp091.NewConnectionProperties())
 
-	err = ch.Publish(
-		"",
-		q.Name,
+	queueEmmitBalanceRequest, err := ch.QueueDeclare(
+		"q.balances-service.EmmitBalanceRequest",
+		true,
 		false,
 		false,
-		amqp091.Publishing{
-			ContentType: "text/plain]",
-			Body:        []byte(body),
-		})
+		false,
+		amqp091.NewConnectionProperties())
+
+	queueEmmitBalanceResponse, err := ch.QueueDeclare(
+		"q.balances-service.EmmitBalanceResponse",
+		true,
+		false,
+		false,
+		false,
+		amqp091.NewConnectionProperties())
+
+	err = ch.QueueBind(
+		queueEmmitBalanceRequest.Name,
+		"r.balances-service.EmmitBalanceRequest",
+		"e.balances.forward",
+		false,
+		amqp091.NewConnectionProperties())
+
+	err = ch.QueueBind(
+		queueEmmitBalanceResponse.Name,
+		"r.balances-service.EmmitBalanceResponse",
+		"e.balances.forward",
+		false,
+		amqp091.NewConnectionProperties())
 
 }
