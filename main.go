@@ -3,6 +3,7 @@ package main
 import (
 	"example/mymodule/requests"
 	"example/mymodule/rmq"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	gonanoid "github.com/matoous/go-nanoid"
@@ -17,6 +18,8 @@ func main() {
 		if err := ctx.ShouldBindJSON(&emitBalance); err != nil {
 			ctx.JSON(400, gin.H{"Wrong request ": err.Error()})
 		}
+		err := ctx.BindJSON(emitBalance)
+		fmt.Println(emitBalance.Amount)
 		id, err := gonanoid.ID(10)
 		if err != nil {
 			ctx.JSON(500, gin.H{"Internal": err.Error()})
@@ -24,15 +27,16 @@ func main() {
 		emmitBalanceEvent := proto.EmmitBalanceRequest{
 			Id:       id,
 			Address:  emitBalance.Address,
-			Amount:   emitBalance.Amount,
+			Amount:   int32(emitBalance.Amount),
 			Currency: emitBalance.Currency,
 		}
-		emmitBalanceEvent.GetAddress()
+
+		rmq.PublishMessage(emmitBalanceEvent)
 
 		ctx.JSON(200, gin.H{"message": "Emmit success"})
 
 	})
 
-	router.Run(":" + "8080")
+	router.Run(":" + "8000")
 
 }

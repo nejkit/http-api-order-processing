@@ -1,10 +1,12 @@
 package rmq
 
 import (
+	proto "github.com/nejkit/processing-proto/balances"
 	"github.com/rabbitmq/amqp091-go"
+	googleProto "google.golang.org/protobuf/proto"
 )
 
-func InitRabbit() {
+func InitRabbit() *amqp091.Channel {
 	connection, err := amqp091.Dial("amqp://admin:admin@localhost:5672/")
 	if err != nil {
 		panic(err.Error())
@@ -14,43 +16,23 @@ func InitRabbit() {
 		panic(err.Error())
 	}
 
-	err = ch.ExchangeDeclare(
+	return ch
+}
+
+func PublishMessage(request proto.EmmitBalanceRequest) {
+	ch := InitRabbit()
+	body, err := googleProto.Marshal(&request)
+	if err != nil {
+		return
+	}
+
+	ch.Publish(
 		"e.balances.forward",
-		"topic",
-		true,
-		false,
-		true,
-		false,
-		amqp091.NewConnectionProperties())
-
-	queueEmmitBalanceRequest, err := ch.QueueDeclare(
-		"q.balances-service.EmmitBalanceRequest",
-		true,
+		"r.balances.#.EmmitBalanceRequest.#",
 		false,
 		false,
-		false,
-		amqp091.NewConnectionProperties())
-
-	queueEmmitBalanceResponse, err := ch.QueueDeclare(
-		"q.balances-service.EmmitBalanceResponse",
-		true,
-		false,
-		false,
-		false,
-		amqp091.NewConnectionProperties())
-
-	err = ch.QueueBind(
-		queueEmmitBalanceRequest.Name,
-		"r.balances-service.EmmitBalanceRequest",
-		"e.balances.forward",
-		false,
-		amqp091.NewConnectionProperties())
-
-	err = ch.QueueBind(
-		queueEmmitBalanceResponse.Name,
-		"r.balances-service.EmmitBalanceResponse",
-		"e.balances.forward",
-		false,
-		amqp091.NewConnectionProperties())
-
+		amqp091.Publishing{
+			ContentType: "text/plain",
+			Body:        body,
+		})
 }
