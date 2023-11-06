@@ -1,5 +1,7 @@
-FROM golang:latest
-WORKDIR /app
-COPY ./ ./
-RUN go build -o main .
-CMD ["./main"]
+FROM alpine
+
+WORKDIR /build
+
+COPY main .
+
+CMD [". /main"]
