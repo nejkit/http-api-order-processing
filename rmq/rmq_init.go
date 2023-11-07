@@ -7,7 +7,7 @@ import (
 )
 
 func InitRabbit() *amqp091.Channel {
-	connection, err := amqp091.Dial("amqp://admin:admin@localhost:5670")
+	connection, err := amqp091.Dial("amqp://admin:admin@localhost:5672")
 
 	if err != nil {
 		panic(err.Error())
