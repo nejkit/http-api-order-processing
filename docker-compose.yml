@@ -22,6 +22,7 @@ services:
       - RABBITMQ_DEFAULT_PASS=admin
     networks:
       - orders-network
+    
   postgres:
     image: postgres:13.3
     container_name: db_balances
@@ -35,4 +36,13 @@ services:
       - postgres:/var/lib/postgresql/data
     networks:
       - orders-network
+  balance-service:
+    image: balanceservicebalances:latest
+    container_name: balance-service
+    restart: always
+    networks:
+      - orders-network
+    depends_on:
+      - rabbitmq
+        
     
