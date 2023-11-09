@@ -46,6 +46,8 @@ github.com/nejkit/processing-proto v0.0.0-20231103224459-dc233cb6e8ce h1:z+st7m8
 github.com/nejkit/processing-proto v0.0.0-20231103224459-dc233cb6e8ce/go.mod h1:oHF+bgUiEtRVGLlWsVbBhaOrwb3nrkE8baSRtmzZqJU=
 github.com/nejkit/processing-proto v0.0.0-20231103234244-c3efa13dacd0 h1:iW4ov6oDKrRbwdpcGQM4qWX1sY9lxSAHBAJOxfjNxTs=
 github.com/nejkit/processing-proto v0.0.0-20231103234244-c3efa13dacd0/go.mod h1:oHF+bgUiEtRVGLlWsVbBhaOrwb3nrkE8baSRtmzZqJU=
+github.com/nejkit/processing-proto v0.0.0-20231108221917-c0323a3910b2 h1:671aDjBubRV8zvprI+W6xgc1tojNhufmt2TTWaeNGGY=
+github.com/nejkit/processing-proto v0.0.0-20231108221917-c0323a3910b2/go.mod h1:oHF+bgUiEtRVGLlWsVbBhaOrwb3nrkE8baSRtmzZqJU=
 github.com/pelletier/go-toml/v2 v2.0.8 h1:0ctb6s9mE31h0/lhu+J6OPmVeDxJn+kYnJc2jZR9tGQ=
 github.com/pelletier/go-toml/v2 v2.0.8/go.mod h1:vuYfssBdrU2XDZ9bYydBu6t+6a6PYNcZljzZR9VXg+4=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=

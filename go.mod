@@ -20,7 +20,7 @@ require (
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/nejkit/processing-proto v0.0.0-20231103234244-c3efa13dacd0 // indirect
+	github.com/nejkit/processing-proto v0.0.0-20231108221917-c0323a3910b2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
 	github.com/rabbitmq/amqp091-go v1.9.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect

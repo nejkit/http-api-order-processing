@@ -5,3 +5,7 @@ type EmitBalance struct {
 	Currency string `json:"currency"`
 	Amount   int    `json:"amount"`
 }
+
+type GetBalance struct {
+	Address string `json:"address"`
+}
