@@ -1,4 +1,4 @@
 connection:
   rabbitmq: "amqp://admin:admin@localhost:5672"
 http-server:
-  port: ":8080"
+  port: "localhost:8080"

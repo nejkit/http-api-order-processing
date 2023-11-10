@@ -5,4 +5,5 @@ const (
 	RkEmmitBalanceRequest      = "r.balances.#.EmmitBalanceRequest.#"
 	RkGetWalletInfoRequest     = "r.balances.#.GetWalletInfoRequest.#"
 	QueueGetWalletInfoResponse = "q.balances.response.GetWalletInfoResponse"
+	ConfigPath                 = "./app_config.yaml"
 )

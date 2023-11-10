@@ -4,8 +4,10 @@ import (
 	"context"
 	"example/mymodule/statics"
 
+	balances "github.com/nejkit/processing-proto/balances"
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/protobuf/proto"
 )
 
 func CreateLisWalletInfoResponce(channel *amqp091.Channel, logger *logrus.Logger) <-chan amqp091.Delivery {
@@ -24,4 +26,18 @@ func CreateLisWalletInfoResponce(channel *amqp091.Channel, logger *logrus.Logger
 	}
 
 	return msgs
+}
+
+func ConsumeWalletInfoResponse(id string, messages <-chan amqp091.Delivery) *balances.GetWalletInfoResponse {
+	var response balances.GetWalletInfoResponse
+	for msg := range messages {
+		proto.Unmarshal(msg.Body, &response)
+		if response.Id == id {
+			msg.Ack(false)
+			break
+		} else {
+			msg.Nack(false, true)
+		}
+	}
+	return &response
 }

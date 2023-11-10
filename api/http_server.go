@@ -12,11 +12,11 @@ func StartServer(logger *logrus.Logger, port string, channel *amqp091.Channel, m
 	router := gin.Default()
 
 	router.POST("/emmit-balance", func(ctx *gin.Context) {
-		EmmitBalance(ctx, logger, channel)
+		go EmmitBalance(ctx, logger, channel)
 	})
 
 	router.GET("/wallet-info", func(ctx *gin.Context) {
-		GetWalletInfo(ctx, logger, channel, msgs)
+		go GetWalletInfo(ctx, logger, channel, msgs)
 	})
 
 	server := &http.Server{
