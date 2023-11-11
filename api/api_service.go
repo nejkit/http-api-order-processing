@@ -13,13 +13,14 @@ import (
 
 func EmmitBalance(ctx *gin.Context, logger *logrus.Logger, channel *amqp091.Channel) {
 	logger.Info("Received request: ", ctx.Request.Body)
-	var emmitBalanceRequest *requests.EmitBalanceRequest
-	err := ctx.ShouldBindJSON(&emmitBalanceRequest)
+	var emmitBalanceRequest requests.EmitBalanceRequest
+	err := ctx.BindJSON(&emmitBalanceRequest)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"Wrong request:": err.Error()})
 		return
 	}
-	go rmq.SendEmmitBalanceRequest(emmitBalanceRequest, channel, logger)
+
+	rmq.SendEmmitBalanceRequest(emmitBalanceRequest, channel, logger)
 
 	ctx.Status(http.StatusOK)
 }

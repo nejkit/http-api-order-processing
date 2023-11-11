@@ -13,7 +13,7 @@ func main() {
 	viper.SetConfigFile(statics.ConfigPath)
 	viper.ReadInConfig()
 
-	var logger *logrus.Logger
+	logger := logrus.New()
 	logger.SetLevel(logrus.InfoLevel)
 	channelRmq := rmq.GetChannel(viper.GetString("connection.rabbitmq"), logger)
 	listenerWalletInfo := rmq.CreateLisWalletInfoResponce(channelRmq, logger)

@@ -12,9 +12,12 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func SendEmmitBalanceRequest(request *requests.EmitBalanceRequest, channel *amqp091.Channel, logger *logrus.Logger) {
-	id, _ := uuid.NewRandom()
-
+func SendEmmitBalanceRequest(request requests.EmitBalanceRequest, channel *amqp091.Channel, logger *logrus.Logger) {
+	id, err := uuid.NewRandom()
+	if err != nil {
+		logger.Fatal(err.Error())
+	}
+	logger.Infoln("Generated id to balance-service: ", id.String())
 	event := &balances.EmmitBalanceRequest{
 		Id:       id.String(),
 		Address:  request.Address,
@@ -26,7 +29,7 @@ func SendEmmitBalanceRequest(request *requests.EmitBalanceRequest, channel *amqp
 
 	bytes, _ := proto.Marshal(event)
 
-	err := channel.PublishWithContext(
+	err = channel.PublishWithContext(
 		context.Background(),
 		statics.BalanceExchangeName,
 		statics.RkEmmitBalanceRequest,
