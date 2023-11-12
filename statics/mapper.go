@@ -7,8 +7,8 @@ import (
 )
 
 func Map(protoResponse *balances.GetWalletInfoResponse) *requests.GetBalanceResponse {
-	var response *requests.GetBalanceResponse
-	data := protoResponse.GetWalletInfo()
+	var response requests.GetBalanceResponse
+	data := *protoResponse.GetWalletInfo()
 	response.Address = data.GetAddress()
 	response.Created = data.GetCreated()
 	for _, balanceInfo := range data.BalanceInfos {
@@ -18,5 +18,5 @@ func Map(protoResponse *balances.GetWalletInfoResponse) *requests.GetBalanceResp
 			FreezeBalance: balanceInfo.GetFreezeBalance()})
 	}
 
-	return response
+	return &response
 }

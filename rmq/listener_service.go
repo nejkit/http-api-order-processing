@@ -28,10 +28,11 @@ func CreateLisWalletInfoResponce(channel *amqp091.Channel, logger *logrus.Logger
 	return msgs
 }
 
-func ConsumeWalletInfoResponse(id string, messages <-chan amqp091.Delivery) *balances.GetWalletInfoResponse {
+func ConsumeWalletInfoResponse(id string, messages <-chan amqp091.Delivery, logger *logrus.Logger) *balances.GetWalletInfoResponse {
 	var response balances.GetWalletInfoResponse
 	for msg := range messages {
 		proto.Unmarshal(msg.Body, &response)
+		logger.Info("Response from balance-service:", response.String())
 		if response.Id == id {
 			msg.Ack(false)
 			break

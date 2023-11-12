@@ -45,7 +45,7 @@ func SendEmmitBalanceRequest(request requests.EmitBalanceRequest, channel *amqp0
 	}
 }
 
-func SendGetWalletInfoRequest(request *requests.GetBalance, channel *amqp091.Channel, logger *logrus.Logger) string {
+func SendGetWalletInfoRequest(request requests.GetBalance, channel *amqp091.Channel, logger *logrus.Logger) string {
 	id, _ := uuid.NewRandom()
 
 	event := &balances.GetWalletInfoRequest{

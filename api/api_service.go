@@ -12,13 +12,13 @@ import (
 )
 
 func EmmitBalance(ctx *gin.Context, logger *logrus.Logger, channel *amqp091.Channel) {
-	logger.Info("Received request: ", ctx.Request.Body)
 	var emmitBalanceRequest requests.EmitBalanceRequest
 	err := ctx.BindJSON(&emmitBalanceRequest)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"Wrong request:": err.Error()})
 		return
 	}
+	logger.Info("Received request: ", emmitBalanceRequest.Address, emmitBalanceRequest.Amount, emmitBalanceRequest.Currency)
 
 	rmq.SendEmmitBalanceRequest(emmitBalanceRequest, channel, logger)
 
@@ -26,17 +26,17 @@ func EmmitBalance(ctx *gin.Context, logger *logrus.Logger, channel *amqp091.Chan
 }
 
 func GetWalletInfo(ctx *gin.Context, logger *logrus.Logger, channel *amqp091.Channel, msgs <-chan amqp091.Delivery) {
-	logger.Info("Received request: ", ctx.Request.Body)
-	var request *requests.GetBalance
-	err := ctx.ShouldBindJSON(&request)
+	var request requests.GetBalance
+	err := ctx.BindJSON(&request)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"Wrong request:": err.Error()})
 	}
+	logger.Info("Received address: ", request.Address)
 
 	id := rmq.SendGetWalletInfoRequest(request, channel, logger)
 
-	response := rmq.ConsumeWalletInfoResponse(id, msgs)
+	response := rmq.ConsumeWalletInfoResponse(id, msgs, logger)
 
 	httpResponse := statics.Map(response)
 
