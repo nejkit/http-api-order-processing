@@ -2,11 +2,11 @@ package rmq
 
 import (
 	"context"
+	"example/mymodule/external/balances"
 	"example/mymodule/requests"
 	"example/mymodule/statics"
 
 	"github.com/google/uuid"
-	"github.com/nejkit/processing-proto/balances"
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"

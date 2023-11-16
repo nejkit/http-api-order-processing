@@ -1,9 +1,8 @@
 package statics
 
 import (
+	"example/mymodule/external/balances"
 	"example/mymodule/requests"
-
-	"github.com/nejkit/processing-proto/balances"
 )
 
 func Map(protoResponse *balances.GetWalletInfoResponse) *requests.GetBalanceResponse {

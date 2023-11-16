@@ -2,9 +2,9 @@ package rmq
 
 import (
 	"context"
+	"example/mymodule/external/balances"
 	"example/mymodule/statics"
 
-	balances "github.com/nejkit/processing-proto/balances"
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
