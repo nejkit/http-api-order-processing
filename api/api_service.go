@@ -7,17 +7,27 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/sirupsen/logrus"
 )
 
 func EmmitBalance(ctx *gin.Context, logger *logrus.Logger, channel *amqp091.Channel) {
 	var emmitBalanceRequest requests.EmitBalanceRequest
+	validate := validator.New()
 	err := ctx.BindJSON(&emmitBalanceRequest)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"Wrong request:": err.Error()})
 		return
 	}
+
+	err = validate.Struct(emmitBalanceRequest)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message: ": err.Error()})
+		return
+	}
+
 	logger.Info("Received request: ", emmitBalanceRequest.Address, emmitBalanceRequest.Amount, emmitBalanceRequest.Currency)
 
 	rmq.SendEmmitBalanceRequest(emmitBalanceRequest, channel, logger)
@@ -27,11 +37,20 @@ func EmmitBalance(ctx *gin.Context, logger *logrus.Logger, channel *amqp091.Chan
 
 func GetWalletInfo(ctx *gin.Context, logger *logrus.Logger, channel *amqp091.Channel, msgs <-chan amqp091.Delivery) {
 	var request requests.GetBalance
+
 	err := ctx.BindJSON(&request)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"Wrong request:": err.Error()})
 	}
+	validate := validator.New()
+
+	err = validate.Struct(request)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message: ": err.Error()})
+		return
+	}
+
 	logger.Info("Received address: ", request.Address)
 
 	id := rmq.SendGetWalletInfoRequest(request, channel, logger)

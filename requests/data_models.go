@@ -1,9 +1,9 @@
 package requests
 
 type EmitBalanceRequest struct {
-	Address  string  `json:"address"`
-	Currency string  `json:"currency"`
-	Amount   float64 `json:"amount"`
+	Address  string  `json:"address" validate:"required,min=10,max=20"`
+	Currency string  `json:"currency" validate:"required,len=3"`
+	Amount   float64 `json:"amount" validate:"required,gt=0.00"`
 }
 
 type EmmitBalanceResponse struct {
@@ -11,7 +11,7 @@ type EmmitBalanceResponse struct {
 }
 
 type GetBalance struct {
-	Address string `json:"address"`
+	Address string `json:"address" validate:"required"`
 }
 
 type BalanceInfo struct {

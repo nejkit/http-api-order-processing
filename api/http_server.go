@@ -1,6 +1,8 @@
 package api
 
 import (
+	"context"
+	"example/mymodule/rmq"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -8,15 +10,19 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func StartServer(logger *logrus.Logger, port string, channel *amqp091.Channel, msgs <-chan amqp091.Delivery) *http.Server {
+func StartServer(logger *logrus.Logger, port string, connection *amqp091.Connection, ctx context.Context) *http.Server {
 	router := gin.Default()
-
+	emmitBalanceReqChannel := rmq.GetChannel(connection, logger)
+	walletInfoReqChannel := rmq.GetChannel(connection, logger)
+	walletInfoRespChannel := rmq.GetChannel(connection, logger)
 	router.POST("/emmit-balance", func(ctx *gin.Context) {
-		EmmitBalance(ctx, logger, channel)
+		EmmitBalance(ctx, logger, emmitBalanceReqChannel)
 	})
 
+	listenerWalletInfoResponse := rmq.CreateLisWalletInfoResponce(walletInfoRespChannel, logger)
+
 	router.GET("/wallet-info", func(ctx *gin.Context) {
-		GetWalletInfo(ctx, logger, channel, msgs)
+		GetWalletInfo(ctx, logger, walletInfoReqChannel, listenerWalletInfoResponse)
 	})
 
 	server := &http.Server{
@@ -24,8 +30,17 @@ func StartServer(logger *logrus.Logger, port string, channel *amqp091.Channel, m
 		Handler: router,
 	}
 
-	server.ListenAndServe()
+	go server.ListenAndServe()
 
-	return server
+	for {
+		select {
+		case <-ctx.Done():
+			server.Close()
+			emmitBalanceReqChannel.Close()
+			walletInfoReqChannel.Close()
+			walletInfoRespChannel.Close()
+			break
+		}
+	}
 
 }
