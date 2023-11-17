@@ -55,9 +55,13 @@ func SendGetWalletInfoRequest(request requests.GetBalance, channel *amqp091.Chan
 
 	logger.Infoln("Generated event to balance-service: ", event.String())
 
-	bytes, _ := proto.Marshal(event)
+	bytes, err := proto.Marshal(event)
 
-	err := channel.PublishWithContext(
+	if err != nil {
+		logger.Errorln(err.Error())
+	}
+
+	err = channel.PublishWithContext(
 		context.Background(),
 		statics.BalanceExchangeName,
 		statics.RkGetWalletInfoRequest,
