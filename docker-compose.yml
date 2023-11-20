@@ -44,5 +44,10 @@ services:
       - orders-network
     depends_on:
       - rabbitmq
+  redis:
+    image: redis:latest
+    container_name: db_orders
+    restart: always
+    networks:
+      - orders-network
         
-    
