@@ -1,6 +1,8 @@
 package api
 
 import (
+	"example/mymodule/external/balances"
+	"example/mymodule/external/orders"
 	"example/mymodule/requests"
 	"example/mymodule/rmq"
 	"example/mymodule/statics"
@@ -11,6 +13,41 @@ import (
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/sirupsen/logrus"
 )
+
+type Handler struct {
+	logger              *logrus.Logger
+	emmitSender         rmq.AmqpSender
+	walletInfoSender    rmq.AmqpSender
+	createOrderSender   rmq.AmqpSender
+	walletInfoListener  rmq.Listener[balances.GetWalletInfoResponse]
+	createOrderListener rmq.Listener[orders.CreateOrderResponse]
+}
+
+func NewHandler(logger *logrus.Logger, emSend rmq.AmqpSender, walInfSend rmq.AmqpSender, crOrderSend rmq.AmqpSender, walletLis rmq.Listener[balances.GetWalletInfoResponse], crOrderLis rmq.Listener[orders.CreateOrderResponse]) Handler {
+	return Handler{
+		logger:              logger,
+		emmitSender:         emSend,
+		walletInfoSender:    walInfSend,
+		createOrderSender:   crOrderSend,
+		walletInfoListener:  walletLis,
+		createOrderListener: crOrderLis,
+	}
+}
+
+func (h *Handler) EmmitBalanceHandle(ctx *gin.Context) {
+	var emBalRequest requests.EmitBalanceRequest
+	val := validator.New()
+	err := ctx.BindJSON(emBalRequest)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"Wrong request ": err.Error()})
+	}
+	err = val.Struct(emBalRequest)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"Wrong request ": err.Error()})
+	}
+	//add service mb
+	ctx.Status(http.StatusOK)
+}
 
 func EmmitBalance(ctx *gin.Context, logger *logrus.Logger, channel *amqp091.Channel) {
 	var emmitBalanceRequest requests.EmitBalanceRequest
