@@ -3,8 +3,11 @@ package main
 import (
 	"context"
 	"example/mymodule/api"
+	"example/mymodule/external/balances"
 	"example/mymodule/rmq"
+	"example/mymodule/services"
 	"example/mymodule/statics"
+	"example/mymodule/util"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -18,12 +21,20 @@ func main() {
 	ctx, cancel := context.WithCancel(rootCtx)
 	logger := logrus.New()
 	logger.SetLevel(logrus.InfoLevel)
-	conRmq, err := rmq.GetConnection(viper.GetString("connection.rabbitmq"), logger)
-	defer conRmq.Close()
-	if err != nil {
-		panic(err.Error())
+
+	amqpFactory := rmq.NewFactory(logger, viper.GetString("connection.rabbitmq"))
+	walletInfoLis := rmq.NewListener[balances.GetWalletInfoResponse](amqpFactory, statics.QueueGetWalletInfoResponse, util.GetParserForWalletInfoListener(), util.GetIdFromWalletInfoResponse())
+	senders := map[int]rmq.AmqpSender{
+		statics.SendEmmitBalanceRequest: amqpFactory.NewSender(statics.BalanceExchangeName, statics.RkEmmitBalanceRequest),
+		statics.SendWalletInfoRequest:   amqpFactory.NewSender(statics.BalanceExchangeName, statics.RkGetWalletInfoRequest),
 	}
-	go api.StartServer(logger, viper.GetString("http-server.port"), conRmq, ctx)
+
+	balServ := services.NewBalanceService(logger, senders, walletInfoLis)
+	handler := api.NewHandler(logger, balServ)
+	server := api.NewServer(logger, handler, viper.GetString("http-server.port"))
+
+	go server.StartServe(ctx)
+
 	exit := make(chan os.Signal, 1)
 	for {
 		select {

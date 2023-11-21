@@ -2,31 +2,30 @@ package api
 
 import (
 	"context"
-	"example/mymodule/rmq"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rabbitmq/amqp091-go"
 	"github.com/sirupsen/logrus"
 )
 
-func StartServer(logger *logrus.Logger, port string, connection *amqp091.Connection, ctx context.Context) *http.Server {
+type ServerApi struct {
+	logger  *logrus.Logger
+	handler Handler
+	host    string
+}
+
+func NewServer(logger *logrus.Logger, handler Handler, host string) ServerApi {
+	return ServerApi{logger: logger, handler: handler, host: host}
+}
+
+func (s *ServerApi) StartServe(ctx context.Context) {
 	router := gin.Default()
-	emmitBalanceReqChannel := rmq.GetChannel(connection, logger)
-	walletInfoReqChannel := rmq.GetChannel(connection, logger)
-	walletInfoRespChannel := rmq.GetChannel(connection, logger)
-	router.POST("/emmit-balance", func(ctx *gin.Context) {
-		EmmitBalance(ctx, logger, emmitBalanceReqChannel)
-	})
 
-	listenerWalletInfoResponse := rmq.CreateLisWalletInfoResponce(walletInfoRespChannel, logger)
+	router.POST("/emmit-balance", s.handler.EmmitBalanceHandle)
 
-	router.GET("/wallet-info", func(ctx *gin.Context) {
-		GetWalletInfo(ctx, logger, walletInfoReqChannel, listenerWalletInfoResponse)
-	})
-
+	router.GET("/wallet-info", s.handler.WalletInfoHandle)
 	server := &http.Server{
-		Addr:    port,
+		Addr:    s.host,
 		Handler: router,
 	}
 
@@ -36,11 +35,7 @@ func StartServer(logger *logrus.Logger, port string, connection *amqp091.Connect
 		select {
 		case <-ctx.Done():
 			server.Close()
-			emmitBalanceReqChannel.Close()
-			walletInfoReqChannel.Close()
-			walletInfoRespChannel.Close()
 			break
 		}
 	}
-
 }
