@@ -48,6 +48,16 @@ services:
     image: redis:latest
     container_name: db_orders
     restart: always
+    ports:
+      - "6379:6379"
     networks:
       - orders-network
+  order-processing:
+    image: orderproccesing:latest
+    container_name: orderprocessing
+    restart: always
+    networks:
+      - orders-network
+    depends_on:
+      - redis
         
