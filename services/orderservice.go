@@ -63,26 +63,20 @@ func parseOrderInfo(response *orders.GetOrderResponse) (*requests.OrderInfo, err
 		return nil, errors.New("NotFound")
 	}
 	orderData := response.GetOrderData()
-	var matchingData []requests.MatchingData
-	for _, matchData := range orderData.GetMatchInfos() {
-		matchingData = append(matchingData, requests.MatchingData{
-			FillVolume: float64(matchData.GetFillVolume()),
-			FillPrice:  float64(matchData.GetFillPrice()),
-			Date:       matchData.GetDate(),
-			State:      matchData.GetState(),
-		})
-	}
+
 	orderInfo := &requests.OrderInfo{
 		Id:             orderData.GetId(),
 		CurrencyPair:   orderData.GetCurrencyPair(),
 		Direction:      int(orderData.GetDirection()),
-		InitPrice:      float64(orderData.GetInitPrice()),
-		MatchInfo:      matchingData,
-		InitVolume:     float64(orderData.GetInitVolume()),
+		InitPrice:      orderData.GetInitPrice(),
+		FillPrice:      orderData.FillPrice,
+		FillVolume:     orderData.FillVolume,
+		MatchingDate:   orderData.Date.AsTime(),
+		InitVolume:     orderData.GetInitVolume(),
 		ExchangeWallet: orderData.GetExchangeWallet(),
-		CreationDate:   orderData.GetCreationDate(),
-		UpdatedDate:    orderData.GetUpdatedDate(),
-		ExpirationDate: orderData.GetExpirationDate(),
+		CreationDate:   orderData.GetCreationDate().AsTime(),
+		UpdatedDate:    orderData.GetUpdatedDate().AsTime(),
+		ExpirationDate: orderData.GetExpirationDate().AsTime(),
 		OrderState:     int(orderData.GetOrderState()),
 		OrderType:      int(orderData.GetOrderType()),
 	}

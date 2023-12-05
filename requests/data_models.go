@@ -1,6 +1,9 @@
 package requests
 
-import "example/mymodule/external/orders"
+import (
+	"example/mymodule/external/orders"
+	"time"
+)
 
 type EmitBalanceRequest struct {
 	Address  string  `json:"address" validate:"required,min=10,max=20"`
@@ -31,8 +34,8 @@ type GetBalanceResponse struct {
 type CreateOrderRequest struct {
 	CurrencyPair   string           `json:"currencyPair"`
 	Direction      orders.Direction `json:"direction"`
-	InitialPrice   float32          `json:"initialPrice"`
-	InitialVolume  float32          `json:"initialVolume"`
+	InitialPrice   float64          `json:"initialPrice"`
+	InitialVolume  float64          `json:"initialVolume"`
 	OrderType      orders.OrderType `json:"orderType"`
 	ExchangeWallet string           `json:"exchangeWallet"`
 }
@@ -41,26 +44,21 @@ type CreateOrderResponse struct {
 	Id string `json:"orderId"`
 }
 
-type MatchingData struct {
-	FillVolume float64           `json:"filledVolume"`
-	FillPrice  float64           `json:"filledPrice"`
-	Date       uint64            `json:"creationDate"`
-	State      orders.MatchState `json:"dealState"`
-}
-
 type OrderInfo struct {
 	Id string `json:"orderId"`
 
-	CurrencyPair   string         `json:"currencyPair"`
-	Direction      int            `json:"direction"`
-	InitPrice      float64        `json:"initialPrice"`
-	MatchInfo      []MatchingData `json:"dealInfos"`
-	InitVolume     float64        `json:"initialVolume"`
-	ExchangeWallet string         `json:"exchangeWallet"`
+	CurrencyPair   string    `json:"currencyPair"`
+	Direction      int       `json:"direction"`
+	InitPrice      float64   `json:"initialPrice"`
+	FillPrice      float64   `json:"fillPrice"`
+	FillVolume     float64   `json:"fillVolume"`
+	MatchingDate   time.Time `json:"matchingDate"`
+	InitVolume     float64   `json:"initialVolume"`
+	ExchangeWallet string    `json:"exchangeWallet"`
 
-	CreationDate   uint64 `json:"creationDate"`
-	UpdatedDate    uint64 `json:"updatedDate"`
-	ExpirationDate uint64 `json:"expirationDate"`
+	CreationDate   time.Time `json:"creationDate"`
+	UpdatedDate    time.Time `json:"updatedDate"`
+	ExpirationDate time.Time `json:"expirationDate"`
 
 	OrderState int `json:"orderState"`
 	OrderType  int `json:"orderType"`
