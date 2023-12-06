@@ -8,17 +8,17 @@ import (
 	"example/mymodule/statics"
 
 	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
+	logger "github.com/sirupsen/logrus"
 )
 
 type BalanceService struct {
-	logger         *logrus.Logger
-	senders        map[int]rmq.AmqpSender
+	emmitSender    rmq.AmqpSender
+	walInfoSender  rmq.AmqpSender
 	walletListener rmq.Listener[balances.GetWalletInfoResponse]
 }
 
-func NewBalanceService(logger *logrus.Logger, senders map[int]rmq.AmqpSender, walLis rmq.Listener[balances.GetWalletInfoResponse]) BalanceService {
-	return BalanceService{logger: logger, senders: senders, walletListener: walLis}
+func NewBalanceService(walLis rmq.Listener[balances.GetWalletInfoResponse], wls rmq.AmqpSender, ebs rmq.AmqpSender) BalanceService {
+	return BalanceService{walletListener: walLis, walInfoSender: wls, emmitSender: ebs}
 }
 
 func (s *BalanceService) EmmitBalance(ctx context.Context, request *requests.EmitBalanceRequest) {
@@ -29,11 +29,7 @@ func (s *BalanceService) EmmitBalance(ctx context.Context, request *requests.Emi
 		Currency: request.Currency,
 		Amount:   request.Amount,
 	}
-
-	sender, ok := s.senders[statics.SendEmmitBalanceRequest]
-	if ok {
-		sender.SendMessage(ctx, event)
-	}
+	s.emmitSender.SendMessage(ctx, event)
 }
 
 func (s *BalanceService) WalletInfo(ctx context.Context, request *requests.GetBalance) *requests.GetBalanceResponse {
@@ -43,15 +39,10 @@ func (s *BalanceService) WalletInfo(ctx context.Context, request *requests.GetBa
 		Id:      id,
 		Address: request.Address,
 	}
+	logger.Infoln("Event: ", event.String())
 
-	sender, ok := s.senders[statics.SendWalletInfoRequest]
-	if !ok {
-		s.logger.Errorln("Fail get sender! ")
-		return nil
-	}
-
-	sender.SendMessage(ctx, event)
+	s.walInfoSender.SendMessage(ctx, event)
 	response := s.walletListener.ConsumeById(ctx, id)
-
+	logger.Infoln("Receive response: ", response.String())
 	return statics.Map(response)
 }

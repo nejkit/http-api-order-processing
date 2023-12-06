@@ -5,25 +5,36 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 type ServerApi struct {
-	logger  *logrus.Logger
 	handler Handler
 	host    string
 }
 
-func NewServer(logger *logrus.Logger, handler Handler, host string) ServerApi {
-	return ServerApi{logger: logger, handler: handler, host: host}
+func NewServer(handler Handler, host string) ServerApi {
+	return ServerApi{handler: handler, host: host}
 }
 
 func (s *ServerApi) StartServe(ctx context.Context) {
 	router := gin.Default()
 
-	router.POST("/emmit-balance", s.handler.EmmitBalanceHandle)
+	router.POST("/emmit-balance", func(ctx *gin.Context) {
+		s.handler.EmmitBalanceHandle(ctx)
+	})
 
-	router.GET("/wallet-info", s.handler.WalletInfoHandle)
+	router.GET("/wallet-info", func(ctx *gin.Context) {
+		s.handler.WalletInfoHandle(ctx)
+	})
+
+	router.POST("/order", func(ctx *gin.Context) {
+		s.handler.CreateOrderHandle(ctx)
+	})
+
+	router.GET("/order/:orderid", func(ctx *gin.Context) {
+		s.handler.GetOrderHangle(ctx)
+	})
+
 	server := &http.Server{
 		Addr:    s.host,
 		Handler: router,
